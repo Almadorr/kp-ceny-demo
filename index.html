@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пример: КП с ценами и без цен</title>
+<meta name="description" content="Пример правки коммерческого предложения: новые цены в таблицах тарифов и та же версия без цен, которую можно редактировать в PowerPoint.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16243a; --muted:#5b6b82; --page:#eef3f9; --card:#ffffff;
+  --brand:#1f6fd1; --brand-d:#0d4fa3; --title:#1d8fd6;
+  --th:#8fa8f5; --td:#dfe6fd; --td2:#cfdafc; --line:#c9d6ee;
+  --accent:#e8f1ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:Inter,Arial,sans-serif;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 64px}
+header h1{font-size:clamp(26px,4vw,40px);line-height:1.15;margin:0 0 10px;letter-spacing:-.02em}
+header p{margin:0;color:var(--muted);max-width:760px;font-size:17px}
+.note{display:inline-block;margin-top:14px;font-size:13px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+
+.switch{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:5px;width:max-content;max-width:100%;margin:30px 0 16px}
+.switch button{font:inherit;font-weight:600;font-size:15px;border:0;background:transparent;color:var(--muted);padding:9px 16px;border-radius:8px;cursor:pointer}
+.switch button[aria-pressed="true"]{background:var(--brand);color:#fff}
+
+.slides{display:grid;gap:22px}
+.frame{background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(22,36,58,.10);overflow:hidden}
+.cap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin:0 0 8px 2px}
+.cap b{color:var(--ink)}
+
+/* slide is drawn at 1440x810 and scaled to fit */
+.scaler{position:relative;width:100%;aspect-ratio:16/9}
+.slide{position:absolute;left:0;top:0;width:1440px;height:810px;transform-origin:0 0;background:#fff;padding:44px 64px;font-family:Inter,Arial,sans-serif;color:#1b1b1b}
+.s-head{display:flex;align-items:center;gap:56px;height:120px}
+.logo{width:250px;height:100px;border-radius:22px;background:linear-gradient(135deg,#2b7be4,#0f4fae);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 26px;flex:none}
+.logo small{font-size:26px;font-style:italic;font-weight:600;opacity:.9;line-height:1}
+.logo strong{font-size:40px;font-weight:800;letter-spacing:.02em;line-height:1.05}
+.s-title{font-size:44px;font-weight:700;color:var(--title);margin:0}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:60px;margin-top:40px}
+.col h3{margin:0;text-align:center;font-size:27px;font-weight:700}
+.col .sub{text-align:center;font-size:21px;margin:2px 0 16px}
+.ico{width:76px;height:76px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:30px}
+table.t{width:100%;border-collapse:separate;border-spacing:6px}
+table.t th{background:var(--th);font-size:15px;font-weight:700;height:52px}
+table.t td{background:var(--td);font-size:16px;height:54px;text-align:center}
+table.t td:first-child{width:62%}
+table.t td.price{width:38%}
+.foot{position:absolute;left:64px;bottom:30px;font-size:13px;font-style:italic;line-height:1.35;color:#333}
+
+/* table slide 2 */
+.t2{width:100%;border-collapse:collapse;margin-top:34px;font-size:18px}
+.t2 caption{caption-side:top;text-align:left;font-size:22px;padding:0 0 12px;color:#1b1b1b}
+.t2 th,.t2 td{border:2px solid #fff;padding:0 10px;height:52px;text-align:center}
+.t2 thead th{background:#1593e6;color:#fff;font-style:italic;font-weight:500;font-size:19px}
+.t2 thead th:first-child,.t2 tbody th{background:#0a62c9;color:#fff;font-style:normal;font-size:15px;font-weight:700;width:230px;line-height:1.2}
+.t2 td{background:#d4e9fb}
+.t2 td.it{font-style:italic}
+
+/* no-price mode: empty cells ready to fill */
+.noprice td.price, .noprice td.p{color:transparent;background:repeating-linear-gradient(-45deg,#eef2fe 0 8px,#e3e9fd 8px 16px);position:relative}
+.noprice .t2 td.p{background:repeating-linear-gradient(-45deg,#e7f2fc 0 8px,#d9ebfb 8px 16px)}
+.noprice .foot .pnote{display:none}
+
+.changed{outline:3px solid #ffb020;outline-offset:-3px}
+.noprice .changed{outline:none}
+.legend{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin:10px 2px 0}
+.legend i{width:16px;height:16px;border:3px solid #ffb020;border-radius:3px;display:inline-block}
+.noprice-only{display:none}
+.mode-noprice .noprice-only{display:flex}
+.mode-noprice .price-only{display:none}
+
+section.how{margin-top:52px}
+section.how h2{font-size:clamp(22px,3vw,30px);margin:0 0 18px;letter-spacing:-.01em}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.card h3{margin:0 0 6px;font-size:18px}
+.card p{margin:0 0 14px;color:var(--muted);font-size:15px}
+.btn{display:inline-block;background:var(--brand);color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:10px 16px;border-radius:9px}
+.btn:hover{background:var(--brand-d)}
+.btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.steps{margin:28px 0 0;padding:20px 22px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.steps h3{margin:0 0 8px;font-size:18px}
+.steps ol{margin:0;padding-left:20px;color:var(--ink)}
+.steps li{margin:4px 0}
+footer{margin-top:40px;font-size:13px;color:var(--muted)}
+
+@media print{
+  @page{size:1440px 810px;margin:0}
+  body{background:#fff}
+  .wrap>*:not(.slides){display:none!important}
+  .wrap{padding:0;max-width:none}
+  .slides{gap:0}
+  .cap,.legend{display:none!important}
+  .frame{box-shadow:none;border-radius:0;break-after:page}
+  .scaler{width:1440px;height:810px;aspect-ratio:auto}
+  .slide{transform:none!important}
+  .changed{outline:none}
+  .noprice td.price{background:var(--td)!important}
+  .noprice .t2 td.p{background:#d4e9fb!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <h1>Новые цены в КП — и та же КП без цен, которую можно править</h1>
+    <p>Пример на двух слайдах в стиле тарифных таблиц: в одном варианте цены обновлены, в другом ячейки с ценами оставлены пустыми под заполнение. Оба варианта есть в PowerPoint-файле и в PDF.</p>
+    <span class="note">Бренд и цифры в примере вымышленные</span>
+  </header>
+
+  <div class="switch" role="group" aria-label="Вариант КП">
+    <button type="button" data-mode="price" aria-pressed="true">С новыми ценами</button>
+    <button type="button" data-mode="noprice" aria-pressed="false">Без цен</button>
+  </div>
+
+  <div class="slides" id="slides">
+    <div>
+      <div class="cap"><span><b>Слайд 1.</b> Тарифы по мессенджерам</span><span class="price-only">строка «С выгрузкой ответов» убрана, цены обновлены</span><span class="noprice-only">ячейки пустые — впишите свои цены</span></div>
+      <div class="frame"><div class="scaler"><div class="slide">
+        <div class="s-head">
+          <div class="logo"><small>РАССЫЛКА</small><strong>ПЛЮС</strong></div>
+          <h2 class="s-title">Основные тарифы по мессенджерам</h2>
+        </div>
+        <div class="cols">
+          <div class="col">
+            <div class="ico" style="background:linear-gradient(135deg,#5b3cf0,#2aa7ff)">M</div>
+            <h3>Мессенджер MAX</h3><div class="sub">Рассылка от 500 номеров</div>
+            <table class="t"><thead><tr><th>Описание</th><th>Цена</th></tr></thead><tbody>
+              <tr><td>Текст + Картинка</td><td class="price changed">7 ₽</td></tr>
+              <tr><td>Инвайтинг</td><td class="price">6 ₽</td></tr>
+              <tr><td>Чекинг</td><td class="price">0,40 ₽</td></tr>
+            </tbody></table>
+          </div>
+          <div class="col">
+            <div class="ico" style="background:#2aa3e0">T</div>
+            <h3>Telegram</h3><div class="sub">Рассылка от 500 номеров</div>
+            <table class="t"><thead><tr><th>Описание</th><th>Цена</th></tr></thead><tbody>
+              <tr><td>Текст + Картинка + Кнопка</td><td class="price changed">7 ₽</td></tr>
+              <tr><td>Инвайтинг</td><td class="price">6 ₽</td></tr>
+              <tr><td>Чекинг</td><td class="price">0,40 ₽</td></tr>
+            </tbody></table>
+          </div>
+          <div class="col">
+            <div class="ico" style="background:#25c15b">W</div>
+            <h3>WhatsApp</h3><div class="sub">Рассылка от 500 номеров</div>
+            <table class="t"><thead><tr><th>Описание</th><th>Цена</th></tr></thead><tbody>
+              <tr><td>Текст + Картинка + Кнопка</td><td class="price">7 ₽</td></tr>
+              <tr><td>Инвайтинг</td><td class="price">—</td></tr>
+              <tr><td>Чекинг</td><td class="price changed">0,40 ₽</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="foot"><span class="pnote">При заказе больших объёмов рассылок предоставляются индивидуальные условия и скидки.<br>Все тарифы указаны в рублях с учётом НДС.<br></span>*Уточняйте у вашего менеджера.</div>
+      </div></div></div>
+      <div class="legend price-only"><i></i> оранжевой рамкой отмечены изменённые ячейки (в готовых файлах рамки нет)</div>
+    </div>
+
+    <div>
+      <div class="cap"><span><b>Слайд 2.</b> Пакетная тарификация</span><span class="price-only">добавлены новые столбцы и строка «Регистрация шаблона»</span><span class="noprice-only">структура таблицы сохранена, цены убраны</span></div>
+      <div class="frame"><div class="scaler"><div class="slide">
+        <div class="s-head">
+          <div class="logo"><small>РАССЫЛКА</small><strong>ПЛЮС</strong></div>
+        </div>
+        <table class="t2">
+          <caption>Таблица 4. Основные тарифы по оператору «Оператор-1»</caption>
+          <thead><tr><th>Пакетная тарификация</th><th class="changed">1 SMS</th><th class="changed">2 SMS</th><th>3–5 SMS</th><th>6–10 SMS</th><th class="changed">11–20 SMS</th><th class="changed">От 21 SMS</th></tr></thead>
+          <tbody>
+            <tr><th>Сервисный трафик<br>(по шаблонам)</th><td class="p changed">10,40</td><td class="p changed">2,90</td><td class="p changed">2,90</td><td class="p">12,80</td><td class="p changed">31,50</td><td class="p changed">2,90</td></tr>
+            <tr><th>Рекламный трафик</th><td class="p changed">11,60</td><td class="p changed">6,50</td><td class="p changed">16,90</td><td class="p changed">25,80</td><td class="p changed">32,40</td><td class="p changed">9,20</td></tr>
+            <tr><th>От общего имени</th><td class="p changed" colspan="6">12,50</td></tr>
+            <tr><th>Абонентская плата<br>за имя отправителя</th><td class="p it" colspan="6">2000,00</td></tr>
+            <tr><th class="changed">Регистрация<br>каждого шаблона</th><td class="p it changed" colspan="6">1200,00</td></tr>
+          </tbody>
+        </table>
+        <div class="foot">Все тарифы указаны в рублях с учётом НДС.</div>
+      </div></div></div>
+    </div>
+  </div>
+
+  <section class="how">
+    <h2>В каком виде вы получите КП</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>PDF с новыми ценами</h3>
+        <p>Готов к отправке клиентам: тот же дизайн, шрифты и картинки, что в вашем КП.</p>
+        <a class="btn" href="KP-primer-s-cenami.pdf" download>Скачать PDF с ценами</a>
+      </div>
+      <div class="card">
+        <h3>PDF без цен</h3>
+        <p>Ячейки цен пустые — удобно отправить клиенту, когда цены считаются индивидуально.</p>
+        <a class="btn" href="KP-primer-bez-cen.pdf" download>Скачать PDF без цен</a>
+      </div>
+      <div class="card">
+        <h3>Файл для правок (PowerPoint)</h3>
+        <p>Таблицы настоящие, не картинкой: кликнули в ячейку — вписали цену. Открывается в PowerPoint, Google Презентациях и бесплатном LibreOffice.</p>
+        <a class="btn ghost" href="KP-primer-dlya-pravok.pptx" download>Скачать .pptx</a>
+      </div>
+      <div class="card">
+        <h3>Или копия в Canva</h3>
+        <p>Если ваше КП сделано в Canva, могу передать редактируемую копию прямо туда — правите в браузере, как раньше.</p>
+      </div>
+    </div>
+    <div class="steps">
+      <h3>Как поменять цену самому</h3>
+      <ol>
+        <li>Откройте файл .pptx и найдите нужный слайд.</li>
+        <li>Щёлкните в ячейку с ценой и впишите новую цифру.</li>
+        <li>Нажмите «Файл → Сохранить как → PDF» — готовая КП для клиента.</li>
+      </ol>
+    </div>
+  </section>
+  <footer>Пример подготовлен для отклика на заказ. Бренд «Рассылка Плюс», операторы и цифры вымышленные.</footer>
+</div>
+<script>
+(function(){
+  var app=document.getElementById('app');
+  var params=new URLSearchParams(location.search);
+  function setMode(m){
+    var np=m==='noprice';
+    app.classList.toggle('noprice',np);
+    app.classList.toggle('mode-noprice',np);
+    document.querySelectorAll('.switch button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mode===m))});
+  }
+  document.querySelectorAll('.switch button').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
+  setMode(params.get('mode')==='noprice'?'noprice':'price');
+  function fit(){
+    document.querySelectorAll('.scaler').forEach(function(s){
+      var k=s.clientWidth/1440; s.querySelector('.slide').style.transform='scale('+k+')';
+    });
+  }
+  window.addEventListener('resize',fit); fit();
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(fit)}
+})();
+</script>
+</body>
+</html>
